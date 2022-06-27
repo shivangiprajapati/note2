@@ -1,0 +1,532 @@
+ CREATE DATABASE :-(JAVA CLASS file (DatabaseHelper))
+
+package com.example.practices;
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+import androidx.annotation.Nullable;
+
+public class DatabaseHelper extends SQLiteOpenHelper {
+    public static final String  DATABASE_NAME = "Student.db";
+    public static final String TABLE_NAME = "student_data";
+    public static final String COL_1 = "ID";
+    public static final String COL_2 = "NAME";
+    public static final String COL_3 = "SURNAME";
+    public static final String COL_4 = "MARKS";
+
+
+    public DatabaseHelper(Context context) {
+        super(context, DATABASE_NAME, null, 1);
+         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase sqLiteDatabase) {
+        sqLiteDatabase.execSQL("create table " + TABLE_NAME +"(ID INTEGER PRIMARY KEY AUTOINCREMENT,NAME TEXT,SURNAME TEXT,MARKS INTEGER)");
+
+
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+        sqLiteDatabase.execSQL("DROP TABLE IF EXITSTS"+TABLE_NAME);
+        onCreate(sqLiteDatabase);
+
+    }
+}
+
+(Copy (DatabaseHelper) and go to mainactivity ):-
+
+
+public class MainActivity extends AppCompatActivity {
+    DatabaseHelper myDb;
+
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        myDb = new DatabaseHelper(this);
+
+Layout:- 3-textView,3plaintext, Add Button
+
+Insert :-(DatabaseHelper)
+
+public boolean insertData(String name, String surname, String marks){
+      SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+      ContentValues contentValues = new ContentValues();
+      contentValues.put(COL_2,name);
+      contentValues.put(COL_3,surname);
+      contentValues.put(COL_4,marks);
+      long result = sqLiteDatabase.insert(TABLE_NAME,null,contentValues);
+      if (result ==-1)
+          return false;
+      else
+          return true;
+
+MainActivity :-
+    
+   public class MainActivity extends AppCompatActivity {
+    DatabaseHelper myDb;
+
+    EditText editName,editSurname,editMarks;
+    Button btnAddData;
+
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        myDb = new DatabaseHelper(this);
+
+        editName = (EditText) findViewById(R.id.edittext_name);
+        editSurname = (EditText) findViewById(R.id.edittext_Surname);
+        editMarks = (EditText) findViewById(R.id.edittext_marks);
+        btnAddData = (Button) findViewById(R.id.button_add);
+        AddData();
+    }
+    public void AddData(){
+        btnAddData.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        boolean isInserted = myDb.insertData(editName.getText().toString(),
+                                editSurname.getText().toString(),
+                                editMarks.getText().toString());
+                        if (isInserted =true)
+                            Toast.makeText(MainActivity.this, "Data Inserted", Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(MainActivity.this, "Data not Inserted", Toast.LENGTH_SHORT).show();
+                    }
+                }
+Layout :- View All Button
+
+DatabaseHelper class:-
+
+public Cursor getAllData() {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        Cursor res sqLiteDatabase.rawQuery("select * from " +TABLE_NAME,null);
+        return res;
+        }
+
+MainActivity :-
+public class MainActivity extends AppCompatActivity {
+    DatabaseHelper myDb;
+    EditText editName,editSurname,editMarks;
+    Button btnAddData;
+    Button btnviewAll;
+
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        myDb = new DatabaseHelper(this);
+
+        editName = (EditText) findViewById(R.id.edittext_name);
+        editSurname = (EditText) findViewById(R.id.edittext_Surname);
+        editMarks = (EditText) findViewById(R.id.edittext_marks);
+        btnAddData = (Button) findViewById(R.id.button_add);
+        btnviewAll = (Button) findViewById(R.id.button_viewala);
+        AddData();
+    }
+    public void AddData(){
+        btnAddData.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        boolean isInserted = myDb.insertData(editName.getText().toString(),
+                                editSurname.getText().toString(),
+                                editMarks.getText().toString());
+                        if (isInserted =true)
+                            Toast.makeText(MainActivity.this, "Data Inserted", Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(MainActivity.this, "Data not Inserted", Toast.LENGTH_SHORT).show();
+                    }
+                    );
+                }
+    }
+
+    public void viewAll(){
+        btnviewAll.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Cursor res = myDb.getAllData();
+                        if(res.getCount() ==0){
+                            // show message
+                            showMessage("Error" ,"Nothing found");
+                            return;
+
+                        }
+
+                        StringBuffer buffer = new StringBuffer();
+                        while (res.moveToNext()){
+                            buffer.append("Id :"+ res.getString(0)+"\n");
+                            buffer.append("Name :"+ res.getString(1)+"\n");
+                            buffer.append("Surname :"+ res.getString(2)+"\n");
+                            buffer.append("Marks :"+ res.getString(3)+"\n\n");
+
+                        }
+                        // Show all data
+                        showMessage("Data",buffer.toString());
+                    }
+                }
+        );
+    }
+
+    public void showMessage(String title,String Message){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(true);
+        builder.setTitle(title);
+        builder.setMessage(Message);
+        builder.show();
+    }
+}
+
+Layout :- Update button (1- id (textView) 1- Paintext)
+
+DatabaseHelper:-
+
+public boolean updateData(String id,String name, String surname, String marks){
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COL_1,id);
+        contentValues.put(COL_2,name);
+        contentValues.put(COL_3,surname);
+        contentValues.put(COL_4,marks);
+        sqLiteDatabase.update(TABLE_NAME, contentValues,"id = ?",new String[] { id});
+        return  true;
+
+MainActivity:-
+ 
+public class MainActivity extends AppCompatActivity {
+    DatabaseHelper myDb;
+    EditText editName,editSurname,editMarks editTextId;
+    Button btnAddData;
+    Button btnviewAll;
+    Button btnupdate;
+
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        myDb = new DatabaseHelper(this);
+
+        editName = (EditText) findViewById(R.id.edittext_name);
+        editSurname = (EditText) findViewById(R.id.edittext_Surname);
+        editMarks = (EditText) findViewById(R.id.edittext_marks);
+        editTextId = (EditText)findViewById(R.id.editText_id);
+        btnAddData = (Button) findViewById(R.id.button_add);
+        btnviewAll = (Button) findViewById(R.id.button_viewala);
+        btnupdate = (Button) findViewById(R.id.Button_update);
+        AddData();
+        viewAll();
+        Updatedata();
+
+    }
+    public void Updatedata(){
+        btnupdate.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        boolean isUpdate = myDb.updateData(editTextId.getText().toString(),editName.getText().toString(),editSurname.getText().toString(),editMarks.getText().toString());
+                        if (isUpdate == true){
+                            Toast.makeText(MainActivity.this, "Data is update", Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(MainActivity.this, "Data not update", Toast.LENGTH_SHORT).show();
+
+                        }
+                    }
+                }
+
+    }
+
+Layout :- (1 -Button)
+
+DatabaseHelper:-
+
+ public Integer deleteData (String id){
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        return  sqLiteDatabase.delete(TABLE_NAME, "Id = ?",new String[] {id});
+
+MainActivity:-
+
+public class MainActivity extends AppCompatActivity {
+    DatabaseHelper myDb;
+    EditText editName,editSurname,editMarks editTextId;
+    Button btnAddData;
+    Button btnviewAll;
+    Button btnupdate;
+    Button btndel;
+
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        myDb = new DatabaseHelper(this);
+
+        editName = (EditText) findViewById(R.id.edittext_name);
+        editSurname = (EditText) findViewById(R.id.edittext_Surname);
+        editMarks = (EditText) findViewById(R.id.edittext_marks);
+        editTextId = (EditText)findViewById(R.id.editText_id);
+        btnAddData = (Button) findViewById(R.id.button_add);
+        btnviewAll = (Button) findViewById(R.id.button_viewala);
+        btnupdate = (Button) findViewById(R.id.Button_update);
+        btndel = (Button) findViewById(R.id.button_delete);
+        AddData();
+        viewAll();
+        Updatedata();
+        DeleteData();
+
+    }
+    public void DeleteData(){
+        btndel.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Integer deletedRows = myDb.deleteData(editTextId.getText().toString());
+                        if(deletedRows > 0)
+                            Toast.makeText(MainActivity.this, "Data Deleted", Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(MainActivity.this, "Data not Deleted", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        ); 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+part 2:
+employeedb.java:
+public class employeedb extends SQLiteOpenHelper {
+    public employeedb(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
+        super(context, "employee", factory, 1);
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase sqLiteDatabase) {
+        sqLiteDatabase.execSQL("create table emp (eid integer primary key autoincrement,ename text, designation text, phoneno integer, email text)");
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+        sqLiteDatabase.execSQL("drop table if exists emp");
+        onCreate(sqLiteDatabase);
+    }
+
+    public void addData(String name,String designation, int phoneno, String email){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("ename",name);
+        cv.put("designation",designation);
+        cv.put("phoneno",phoneno);
+        cv.put("email",email);
+        db.insert("emp",null,cv);
+        db.close();
+    }
+
+    public List<String> displaynames(){
+        List<String> namelist = new ArrayList<>();
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery("select ename from emp",null);
+        while(result.moveToNext()){
+            namelist.add(result.getString(0));
+        }
+        return namelist;
+    }
+
+    public Cursor findbyname(String name){
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery("select * from emp where ename=?",new String[]{name});
+        return result;
+
+    }
+}
+
+
+
+insertemp.java:
+
+public class insertemp extends AppCompatActivity {
+
+    TextView ename, phoneno, email;
+    AutoCompleteTextView designation;
+    Button inserbtn;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_insertemp);
+        ename=findViewById(R.id.employeename);
+        phoneno=findViewById(R.id.employeephone);
+        email=findViewById(R.id.employeeemail);
+        designation=findViewById(R.id.employeedesignation);
+        inserbtn=findViewById(R.id.insertdata);
+
+        String[] designations = {"Clerk","Executive","Manager"};
+
+        ArrayAdapter adp = new ArrayAdapter(insertemp.this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,designations);
+
+        designation.setAdapter(adp);
+        designation.setThreshold(1);
+
+        employeedb employeedatabase = new employeedb(insertemp.this,"employee",null,1);
+
+        inserbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String employeephone = phoneno.getText().toString();
+                Integer phoneno = Integer.parseInt(employeephone);
+                employeedatabase.addData(ename.getText().toString(),designation.getText().toString(),phoneno,email.getText().toString());
+                Intent i = new Intent(insertemp.this,MainActivity.class);
+                startActivity(i);
+            }
+        });
+
+    }
+}
+
+
+mainactivity:
+public class MainActivity extends AppCompatActivity {
+
+    ListView employeelist;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.mymenu,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        employeelist=findViewById(R.id.emplist);
+
+        employeedb employeenames = new employeedb(MainActivity.this,"employee",null,1);
+
+        ArrayAdapter<String> adp = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,employeenames.displaynames());
+
+        employeelist.setAdapter(adp);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        switch (item.getItemId()){
+            case R.id.m1:
+                Intent i1 = new Intent(MainActivity.this,insertemp.class);
+                startActivity(i1);
+                break;
+
+            case R.id.m2:
+                Intent i2 = new Intent(MainActivity.this,MainActivity.class);
+                startActivity(i2);
+                break;
+
+            case R.id.m3:
+                Intent i3 = new Intent(MainActivity.this,searchemployee.class);
+                startActivity(i3);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+}
+ 
+
+searchemp:
+public class searchemployee extends AppCompatActivity {
+
+    AutoCompleteTextView empsearch;
+    TextView empid, empname, empdesignation, phoneno, empemail;
+    Button searchbtn;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_searchemployee);
+        empsearch=findViewById(R.id.employeesearch);
+        searchbtn=findViewById(R.id.searchbtn);
+        empid=findViewById(R.id.employeeid);
+        empname=findViewById(R.id.empname);
+        empdesignation=findViewById(R.id.empdesignation);
+        phoneno=findViewById(R.id.empphone);
+        empemail=findViewById(R.id.empemail);
+
+        employeedb empdata = new employeedb(searchemployee.this,"employee",null,1);
+
+        ArrayAdapter adp = new ArrayAdapter(searchemployee.this,androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
+                empdata.displaynames());
+
+        empsearch.setAdapter(adp);
+        empsearch.setThreshold(1);
+
+        searchbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Cursor result = empdata.findbyname(empsearch.getText().toString());
+                result.moveToNext();
+                empid.setText(result.getString(0));
+                empname.setText(result.getString(1));
+                empdesignation.setText(result.getString(2));
+                phoneno.setText(result.getString(3));
+                empemail.setText(result.getString(4));
+            }
+        });
+
+
+    }
